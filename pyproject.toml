@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pplx-agent-compat"
+version = "0.4.2"
+description = "Compatibility matrix for Perplexity Computer sandbox runtimes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "pplx-agent-compat contributors" }]
+keywords = ["perplexity", "computer", "sandbox", "compatibility", "matrix"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Testing",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[project.urls]
+Homepage = "https://pplx-agent-compat.vercel.app"
+Documentation = "https://pplx-agent-compat.vercel.app/docs/quickstart"
+Source = "https://github.com/jamie0x33-bb/pplx-agent-compat"
+
+[project.scripts]
+pplx-compat = "pplx_agent_compat.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pplx_agent_compat"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
