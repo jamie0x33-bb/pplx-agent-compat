@@ -8,6 +8,7 @@ import sys
 
 from . import matrix as matrix_mod
 from . import probe
+from . import registry
 from .config import DEFAULT_BASE_URL, __version__
 
 EXIT_OK = 0
@@ -52,7 +53,25 @@ def cmd_check(args: argparse.Namespace) -> int:
 
 def cmd_report(args: argparse.Namespace) -> int:
     fp = probe.collect()
-    print(json.dumps(fp.as_dict(), indent=2))
+    payload = fp.as_dict()
+
+    if not args.submit:
+        print(json.dumps(payload, indent=2))
+        return EXIT_OK
+
+    try:
+        result = registry.submit(payload, args.base_url)
+    except registry.NoWorkspaceToken as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        print("hint: run without --submit to print the payload", file=sys.stderr)
+        return EXIT_NO_TOKEN
+    except registry.RegistryRejected as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_REJECTED
+
+    print(f"accepted   {result.get('entry_id', '?')}")
+    print(f"workspace  {result.get('workspace', '?')}")
+    print(f"runtime    {payload['runtime']}")
     return EXIT_OK
 
 
@@ -76,7 +95,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_check.add_argument("--runtime", help="override the detected runtime")
     p_check.set_defaults(func=cmd_check)
 
-    p_report = sub.add_parser("report", help="render the submission payload")
+    p_report = sub.add_parser("report", help="render or submit the fingerprint")
+    p_report.add_argument(
+        "--submit",
+        action="store_true",
+        help="post the fingerprint to the registry (needs a workspace bearer)",
+    )
     p_report.set_defaults(func=cmd_report)
 
     return parser
